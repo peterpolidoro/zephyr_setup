@@ -1,0 +1,57 @@
+#+TITLE: zephyr_setup
+#+AUTHOR: Peter Polidoro
+#+EMAIL: peter@polidoro.io
+
+* Repository Information
+- Author :: Peter Polidoro
+- License :: BSD
+
+* Setup
+
+** Docker on host machine
+
+#+BEGIN_SRC sh
+
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get update
+sudo apt-get install \
+     ca-certificates \
+     curl \
+     gnupg \
+     lsb-release -y
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
+#+END_SRC
+
+** Build Docker Image
+
+#+BEGIN_SRC sh
+
+cd zephyr_setup
+docker build -t zephyr:latest .
+
+#+END_SRC
+
+** Pull Docker Image
+
+#+BEGIN_SRC sh
+
+docker pull docker.io/zephyrprojectrtos/zephyr-build:v0.23.2
+
+#+END_SRC
+
+** Run Docker Image
+
+#+BEGIN_SRC sh
+
+docker run -it docker.io/zephyrprojectrtos/zephyr-build:v0.23.2
+
+#+END_SRC
