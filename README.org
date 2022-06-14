@@ -31,20 +31,28 @@ sudo usermod -aG docker $USER
 
 #+END_SRC
 
-** Build Docker Image
-
-#+BEGIN_SRC sh
-
-cd zephyr_setup
-docker build -t zephyr:latest .
-
-#+END_SRC
-
 ** Pull Docker Image
 
 #+BEGIN_SRC sh
 
-docker pull docker.io/zephyrprojectrtos/zephyr-build:v0.23.2
+docker pull zephyrprojectrtos/zephyr-build:latest
+
+#+END_SRC
+
+** Get Zephyr and install Python dependencies
+
+*** Venv
+
+#+BEGIN_SRC sh
+
+python3 -m venv ~/zephyrproject/.venv
+source ~/zephyrproject/.venv/bin/activate
+pip install west
+west init ~/zephyrproject
+cd ~/zephyrproject
+west update
+west zephyr-export
+pip install -r ~/zephyrproject/zephyr/scripts/requirements.txt
 
 #+END_SRC
 
@@ -52,6 +60,25 @@ docker pull docker.io/zephyrprojectrtos/zephyr-build:v0.23.2
 
 #+BEGIN_SRC sh
 
-docker run -it docker.io/zephyrprojectrtos/zephyr-build:v0.23.2
+docker run -it --rm --privileged -p 5900:5900 -v ~/zephyrproject:/workdir -v /dev:/dev zephyrprojectrtos/zephyr-build:latest
+
+#+END_SRC
+
+** Build the Blinky Sample
+
+#+BEGIN_SRC sh
+
+cd zephyr
+sudo west build -p auto -b teensy40 samples/basic/blinky
+exit
+
+#+END_SRC
+
+** Flash the Blinky Sample
+
+#+BEGIN_SRC sh
+
+guix shell teensy-loader-cli
+teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephyr.hex
 
 #+END_SRC
