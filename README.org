@@ -10,6 +10,8 @@
 
 ** Docker on host machine
 
+*** Debian-based
+
 #+BEGIN_SRC sh
 
 sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -39,20 +41,34 @@ docker pull zephyrprojectrtos/zephyr-build:latest
 
 #+END_SRC
 
-** Get Zephyr and install Python dependencies
+** Install west
 
-*** Venv
+*** venv
 
 #+BEGIN_SRC sh
 
 python3 -m venv ~/zephyrproject/.venv
 source ~/zephyrproject/.venv/bin/activate
 pip install west
+
+#+END_SRC
+
+*** guix
+
+#+BEGIN_SRC sh
+
+guix shell west
+
+#+END_SRC
+
+** Get Zephyr
+
+#+BEGIN_SRC sh
+
 west init ~/zephyrproject
 cd ~/zephyrproject
 west update
 west zephyr-export
-pip install -r ~/zephyrproject/zephyr/scripts/requirements.txt
 
 #+END_SRC
 
@@ -80,5 +96,20 @@ exit
 
 guix shell teensy-loader-cli
 teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephyr.hex
+
+#+END_SRC
+
+* PlatformIO
+
+#+BEGIN_SRC sh
+
+curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
+mkdir -p ~/tmp && cd "$_"
+git clone -b v4.16.0 git@github.com:platformio/platform-teensy.git
+guix shell platformio
+pio pkg install -p "https://github.com/platformio/platform-teensy.git"
+cd ~/tmp/platform-teensy/examples/zephyr-synchronization
+pio run -e teensy40 --target upload
+pio device monitor
 
 #+END_SRC
