@@ -101,18 +101,62 @@ teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephy
 
 * PlatformIO
 
+** Setup platformio-udev.rules
+
 #+BEGIN_SRC sh
 
 curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
 sudo service udev restart
 sudo usermod -a -G dialout $USER
 sudo usermod -a -G plugdev $USER
-mkdir -p ~/tmp && cd "$_"
-git clone -b v4.16.0 git@github.com:platformio/platform-teensy.git
+sudo reboot
+
+#+END_SRC
+
+** Install platform-teensy
+
+#+BEGIN_SRC sh
+
 guix shell platformio
 pio pkg install -p "https://github.com/platformio/platform-teensy.git"
+
+#+END_SRC
+
+** Download examples
+
+#+BEGIN_SRC sh
+
+mkdir -p ~/tmp && cd "$_"
+git clone -b v4.16.0 git@github.com:platformio/platform-teensy.git
+
+#+END_SRC
+
+** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
 cd ~/tmp/platform-teensy/examples/zephyr-synchronization
 pio run -e teensy40 --target upload
 pio device monitor
+
+#+END_SRC
+
+** Test example
+
+*** Connect TTL to USB serial converter
+
+| Cable  | Teensy40 | Description |
+|--------+----------+-------------|
+| black  |      GND | GND         |
+| orange |        0 | TXD         |
+| yellow |        1 | RXD         |
+
+*** Run device monitor
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio device monitor -p /dev/ttyUSB0 -b 115200
 
 #+END_SRC
