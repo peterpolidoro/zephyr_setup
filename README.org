@@ -6,7 +6,141 @@
 - Author :: Peter Polidoro
 - License :: BSD
 
-* Setup
+* PlatformIO
+
+** Setup platformio-udev.rules
+
+#+BEGIN_SRC sh
+
+curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
+sudo service udev restart
+sudo usermod -a -G dialout $USER
+sudo usermod -a -G plugdev $USER
+sudo reboot
+
+#+END_SRC
+
+** Download examples
+
+#+BEGIN_SRC sh
+
+mkdir -p ~/tmp && cd "$_"
+git clone https://github.com/janelia-embedded/zephyr_setup
+
+#+END_SRC
+
+** Teensy 4.0
+
+*** Install platform-teensy
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio pkg install -g --platform "platformio/teensy@^4.16.0"
+
+#+END_SRC
+
+*** zephyr-blink
+
+**** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/examples/teensy/zephyr-blink
+pio run -e teensy40 --target upload
+
+#+END_SRC
+
+*** zephyr-synchronization
+
+**** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/examples/teensy/zephyr-synchronization
+pio run -e teensy40 --target upload
+
+#+END_SRC
+
+**** Test example
+
+***** Connect TTL to USB serial converter
+
+| Cable  | Teensy40 | Description |
+|--------+----------+-------------|
+| black  |      GND | GND         |
+| orange |        0 | TXD         |
+| yellow |        1 | RXD         |
+
+***** Run device monitor
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio device monitor -p /dev/ttyUSB0 -b 115200
+
+#+END_SRC
+
+** NXP FRDM-K64F
+
+*** Install platform-freescalekinetis
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio pkg install -g --platform "platformio/freescalekinetis@^9.2.0"
+
+#+END_SRC
+
+*** zephyr-blink
+
+**** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/examples/freescalekinetis/zephyr-blink
+pio run -e frdm_k64f --target upload
+
+#+END_SRC
+
+*** zephyr-net-telnet
+
+**** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/examples/freescalekinetis/zephyr-net-telnet
+pio run -e frdm_k64f --target upload
+
+#+END_SRC
+
+**** Test example
+
+***** Scan for telnet ports
+
+#+BEGIN_SRC sh
+
+ip addr
+# note ip address, e.g. 10.101.30.57
+guix shell nmap
+nmap -p 23 10.101.30.0/24 --open
+
+#+END_SRC
+
+***** Open telnet port
+
+#+BEGIN_SRC sh
+
+guix shell inetutils
+telnet 10.101.30.xx
+
+#+END_SRC
+
+* Docker and West
 
 ** Docker on host machine
 
@@ -99,64 +233,3 @@ teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephy
 
 #+END_SRC
 
-* PlatformIO
-
-** Setup platformio-udev.rules
-
-#+BEGIN_SRC sh
-
-curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
-sudo service udev restart
-sudo usermod -a -G dialout $USER
-sudo usermod -a -G plugdev $USER
-sudo reboot
-
-#+END_SRC
-
-** Install platform-teensy
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-pio pkg install -p "https://github.com/platformio/platform-teensy.git"
-
-#+END_SRC
-
-** Download examples
-
-#+BEGIN_SRC sh
-
-mkdir -p ~/tmp && cd "$_"
-git clone -b v4.16.0 git@github.com:platformio/platform-teensy.git
-
-#+END_SRC
-
-** Build example and upload
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-cd ~/tmp/platform-teensy/examples/zephyr-synchronization
-pio run -e teensy40 --target upload
-pio device monitor
-
-#+END_SRC
-
-** Test example
-
-*** Connect TTL to USB serial converter
-
-| Cable  | Teensy40 | Description |
-|--------+----------+-------------|
-| black  |      GND | GND         |
-| orange |        0 | TXD         |
-| yellow |        1 | RXD         |
-
-*** Run device monitor
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-pio device monitor -p /dev/ttyUSB0 -b 115200
-
-#+END_SRC
