@@ -40,26 +40,26 @@ pio pkg install -g --platform "platformio/teensy@^4.16.0"
 
 #+END_SRC
 
-*** zephyr-blink
+*** platformio-blink
 
 **** Build example and upload
 
 #+BEGIN_SRC sh
 
 guix shell platformio
-cd ~/tmp/zephyr_setup/examples/teensy/zephyr-blink
+cd ~/tmp/zephyr_setup/examples/teensy/platformio-blink
 pio run -e teensy40 --target upload
 
 #+END_SRC
 
-*** zephyr-synchronization
+*** platformio-synchronization
 
 **** Build example and upload
 
 #+BEGIN_SRC sh
 
 guix shell platformio
-cd ~/tmp/zephyr_setup/examples/teensy/zephyr-synchronization
+cd ~/tmp/zephyr_setup/examples/teensy/platformio-synchronization
 pio run -e teensy40 --target upload
 
 #+END_SRC
@@ -94,26 +94,60 @@ pio pkg install -g --platform "platformio/freescalekinetis@^9.2.0"
 
 #+END_SRC
 
-*** zephyr-blink
+*** platformio-blink
 
 **** Build example and upload
 
 #+BEGIN_SRC sh
 
 guix shell platformio
-cd ~/tmp/zephyr_setup/examples/freescalekinetis/zephyr-blink
+cd ~/tmp/zephyr_setup/examples/freescalekinetis/platformio-blink
 pio run -e frdm_k64f --target upload
 
 #+END_SRC
 
-*** zephyr-net-telnet
+*** platformio-net-telnet
 
 **** Build example and upload
 
 #+BEGIN_SRC sh
 
 guix shell platformio
-cd ~/tmp/zephyr_setup/examples/freescalekinetis/zephyr-net-telnet
+cd ~/tmp/zephyr_setup/examples/freescalekinetis/platformio-net-telnet
+pio run -e frdm_k64f --target upload
+
+#+END_SRC
+
+**** Test example
+
+***** Scan for telnet ports
+
+#+BEGIN_SRC sh
+
+ip addr
+# note ip address, e.g. 10.101.30.57
+guix shell nmap
+nmap -p 23 10.101.30.0/24 --open
+
+#+END_SRC
+
+***** Open telnet port
+
+#+BEGIN_SRC sh
+
+guix shell inetutils
+telnet 10.101.30.xx
+
+#+END_SRC
+
+*** zephyr-microros-int32-publisher
+
+**** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/examples/freescalekinetis/platformio-net-telnet
 pio run -e frdm_k64f --target upload
 
 #+END_SRC
@@ -187,14 +221,6 @@ pip install west
 
 #+END_SRC
 
-*** guix
-
-#+BEGIN_SRC sh
-
-guix shell west
-
-#+END_SRC
-
 ** Get Zephyr
 
 #+BEGIN_SRC sh
@@ -233,3 +259,42 @@ teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephy
 
 #+END_SRC
 
+* Guix
+
+** Install west
+
+*** guix
+
+#+BEGIN_SRC sh
+
+guix time-machine -C .channels.scm -- shell --pure -f .guix.scm
+
+#+END_SRC
+
+** Get Zephyr
+
+#+BEGIN_SRC sh
+
+west init ~/zephyrproject
+cd ~/zephyrproject
+west update
+west zephyr-export
+
+#+END_SRC
+
+** Build the Blinky Sample
+
+#+BEGIN_SRC sh
+
+west build -p auto -b frdm_k64f zephyr/samples/basic/blinky
+
+#+END_SRC
+
+** Flash the Blinky Sample
+
+#+BEGIN_SRC sh
+
+guix shell teensy-loader-cli
+teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephyr.hex
+
+#+END_SRC
