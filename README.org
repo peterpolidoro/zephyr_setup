@@ -267,7 +267,12 @@ teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephy
 
 #+BEGIN_SRC sh
 
-guix time-machine -C .channels.scm -- shell --pure -f .guix.scm
+guix time-machine -C .channels.scm -- shell --pure -m .manifest.scm
+export ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb
+export GNUARMEMB_TOOLCHAIN_PATH=$(guix build arm-none-eabi-toolchain)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pyocd
 
 #+END_SRC
 
@@ -284,17 +289,36 @@ west zephyr-export
 
 ** Build the Blinky Sample
 
+*** frdm_k64f
+
 #+BEGIN_SRC sh
 
 west build -p auto -b frdm_k64f zephyr/samples/basic/blinky
 
 #+END_SRC
 
-** Flash the Blinky Sample
+*** teensy
 
 #+BEGIN_SRC sh
 
-guix shell teensy-loader-cli
-teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephyr.hex
+west build -p auto -b teensy40 zephyr/samples/basic/blinky
+
+#+END_SRC
+
+** Flash the Blinky Sample
+
+*** frdm_k64f
+
+#+BEGIN_SRC sh
+
+west flash
+
+#+END_SRC
+
+*** teensy
+
+#+BEGIN_SRC sh
+
+teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/build/zephyr/zephyr.hex
 
 #+END_SRC

@@ -1,3 +1,5 @@
+;; guix time-machine -C .channels.scm -- shell --pure -m .manifest.scm
+
 (specifications->manifest
  '("west"
    "git"
@@ -5,4 +7,10 @@
    "cmake"
    "dtc"
    "gperf"
-   "ninja"))
+   "ninja"
+   "guix"
+   "arm-none-eabi-toolchain"
+   "teensy-loader-cli"
+   "python"
+   "python-pyelftools"
+   "python-virtualenv"))
