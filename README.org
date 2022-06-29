@@ -27,7 +27,7 @@ pip install pyocd
 
 #+BEGIN_SRC sh
 
-west init -m https://git.example.com/my-repo my-downstream https://github.com/janelia-embedded/zephyr_setup/samples/freescalekinetis/zephyr-blinky ~/zephyrproject
+west init -m https://github.com/janelia-embedded/zephyr_setup ~/zephyrproject
 cd ~/zephyrproject
 west update
 west zephyr-export
