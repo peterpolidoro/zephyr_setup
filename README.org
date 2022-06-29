@@ -40,7 +40,7 @@ west zephyr-export
 
 #+BEGIN_SRC sh
 
-west build -p auto -b frdm_k64f zephyr/samples/basic/blinky
+west build -p auto -b frdm_k64f zephyr_setup/samples/basic/blinky
 
 #+END_SRC
 
@@ -48,7 +48,7 @@ west build -p auto -b frdm_k64f zephyr/samples/basic/blinky
 
 #+BEGIN_SRC sh
 
-west build -p auto -b teensy40 zephyr/samples/basic/blinky
+west build -p auto -b teensy40 zephyr_setup/samples/basic/blinky
 
 #+END_SRC
 
