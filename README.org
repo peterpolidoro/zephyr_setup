@@ -34,9 +34,9 @@ west zephyr-export
 
 #+END_SRC
 
-** Build the Blinky Sample
+** frdm_k64f
 
-*** frdm_k64f
+*** Build the Blinky Sample
 
 #+BEGIN_SRC sh
 
@@ -44,17 +44,7 @@ west build -p auto -b frdm_k64f zephyr_setup/samples/basic/blinky
 
 #+END_SRC
 
-*** teensy
-
-#+BEGIN_SRC sh
-
-west build -p auto -b teensy40 zephyr_setup/samples/basic/blinky
-
-#+END_SRC
-
-** Flash the Blinky Sample
-
-*** frdm_k64f
+*** Flash the Blinky Sample
 
 #+BEGIN_SRC sh
 
@@ -62,13 +52,24 @@ west flash
 
 #+END_SRC
 
-*** teensy
+** teensy
+
+*** Build the Blinky Sample
+
+#+BEGIN_SRC sh
+
+west build -p auto -b teensy40 zephyr_setup/samples/basic/blinky
+
+#+END_SRC
+
+*** Flash the Blinky Sample
 
 #+BEGIN_SRC sh
 
 teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/build/zephyr/zephyr.hex
 
 #+END_SRC
+
 * PlatformIO
 
 ** Setup platformio-udev.rules
