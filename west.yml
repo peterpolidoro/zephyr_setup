@@ -3,13 +3,13 @@ manifest:
     - name: zephyrproject-rtos
       url-base: https://github.com/zephyrproject-rtos
     - name: micro-ros
-      url-base: https://github.com/micro-ROS/micro_ros_zephyr_module
+      url-base: https://github.com/micro-ROS
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
       revision: v2.7.2
       import: true
-    - name: micro-ros
+    - name: micro_ros_zephyr_module
       remote: micro-ros
       revision: galactic
       import: true
