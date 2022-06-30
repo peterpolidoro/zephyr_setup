@@ -54,24 +54,6 @@ west flash
 
 #+END_SRC
 
-*** micro-ros
-
-**** build
-
-#+BEGIN_SRC sh
-
-west build -p auto -b frdm_k64f zephyr_setup/samples/micro-ros/int32_publisher
-
-#+END_SRC
-
-**** flash
-
-#+BEGIN_SRC sh
-
-west flash
-
-#+END_SRC
-
 ** teensy
 
 *** blinky
