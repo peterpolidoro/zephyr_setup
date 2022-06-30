@@ -36,7 +36,9 @@ west zephyr-export
 
 ** frdm_k64f
 
-*** Build the Blinky Sample
+*** blinky
+
+**** build
 
 #+BEGIN_SRC sh
 
@@ -44,7 +46,25 @@ west build -p auto -b frdm_k64f zephyr_setup/samples/basic/blinky
 
 #+END_SRC
 
-*** Flash the Blinky Sample
+**** flash
+
+#+BEGIN_SRC sh
+
+west flash
+
+#+END_SRC
+
+*** micro-ros
+
+**** build
+
+#+BEGIN_SRC sh
+
+west build -p auto -b frdm_k64f zephyr_setup/samples/micro-ros/int32_publisher
+
+#+END_SRC
+
+**** flash
 
 #+BEGIN_SRC sh
 
@@ -54,7 +74,9 @@ west flash
 
 ** teensy
 
-*** Build the Blinky Sample
+*** blinky
+
+**** build
 
 #+BEGIN_SRC sh
 
@@ -62,7 +84,7 @@ west build -p auto -b teensy40 zephyr_setup/samples/basic/blinky
 
 #+END_SRC
 
-*** Flash the Blinky Sample
+**** flash
 
 #+BEGIN_SRC sh
 
