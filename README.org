@@ -74,6 +74,26 @@ teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/build/zephyr/zephyr.hex
 
 #+END_SRC
 
+** nucleo_h743zi
+
+*** blinky
+
+**** build
+
+#+BEGIN_SRC sh
+
+west build -p auto -b nucleo_h743zi zephyr_setup/samples/basic/blinky
+
+#+END_SRC
+
+**** flash
+
+#+BEGIN_SRC sh
+
+west flash
+
+#+END_SRC
+
 * PlatformIO
 
 ** Setup platformio-udev.rules
