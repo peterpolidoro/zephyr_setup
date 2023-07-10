@@ -5,271 +5,25 @@
 * Repository Information
 - Author :: Peter Polidoro
 - License :: BSD
+- Date :: July 2023
 
-* Guix
+* Setup
 
-** Install west
+** Docker
 
-*** guix
+*** Docker on host machine
+
+**** Test if Docker is installed
 
 #+BEGIN_SRC sh
-
-guix time-machine -C .channels.scm -- shell --pure -m .manifest.scm
-export ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb
-export GNUARMEMB_TOOLCHAIN_PATH=$(guix build arm-none-eabi-toolchain)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install pyocd
-
+docker --version
 #+END_SRC
 
-** Get Zephyr
+**** Install if necessary
+
+***** Debian-based
 
 #+BEGIN_SRC sh
-
-west init -m https://github.com/janelia-embedded/zephyr_setup ~/zephyrproject
-cd ~/zephyrproject
-west update
-west zephyr-export
-
-#+END_SRC
-
-** frdm_k64f
-
-*** blinky
-
-**** build
-
-#+BEGIN_SRC sh
-
-west build -p auto -b frdm_k64f zephyr_setup/samples/basic/blinky
-
-#+END_SRC
-
-**** flash
-
-#+BEGIN_SRC sh
-
-west flash
-
-#+END_SRC
-
-** teensy
-
-*** blinky
-
-**** build
-
-#+BEGIN_SRC sh
-
-west build -p auto -b teensy40 zephyr_setup/samples/basic/blinky
-
-#+END_SRC
-
-**** flash
-
-#+BEGIN_SRC sh
-
-teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/build/zephyr/zephyr.hex
-
-#+END_SRC
-
-** nucleo_h743zi
-
-*** blinky
-
-**** build
-
-#+BEGIN_SRC sh
-
-west build -p auto -b nucleo_h743zi zephyr_setup/samples/basic/blinky
-
-#+END_SRC
-
-**** flash
-
-#+BEGIN_SRC sh
-
-west flash
-
-#+END_SRC
-
-* PlatformIO
-
-** Setup platformio-udev.rules
-
-#+BEGIN_SRC sh
-
-curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
-sudo service udev restart
-sudo usermod -a -G dialout $USER
-sudo usermod -a -G plugdev $USER
-sudo reboot
-
-#+END_SRC
-
-** Download samples
-
-#+BEGIN_SRC sh
-
-mkdir -p ~/tmp && cd "$_"
-git clone https://github.com/janelia-embedded/zephyr_setup
-
-#+END_SRC
-
-** Teensy 4.0
-
-*** Install platform-teensy
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-pio pkg install -g --platform "platformio/teensy@^4.16.0"
-
-#+END_SRC
-
-*** platformio-blink
-
-**** Build example and upload
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-cd ~/tmp/zephyr_setup/samples/teensy/platformio-blink
-pio run -e teensy40 --target upload
-
-#+END_SRC
-
-*** platformio-synchronization
-
-**** Build example and upload
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-cd ~/tmp/zephyr_setup/samples/teensy/platformio-synchronization
-pio run -e teensy40 --target upload
-
-#+END_SRC
-
-**** Test example
-
-***** Connect TTL to USB serial converter
-
-| Cable  | Teensy40 | Description |
-|--------+----------+-------------|
-| black  |      GND | GND         |
-| orange |        0 | TXD         |
-| yellow |        1 | RXD         |
-
-***** Run device monitor
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-pio device monitor -p /dev/ttyUSB0 -b 115200
-
-#+END_SRC
-
-** NXP FRDM-K64F
-
-*** Install platform-freescalekinetis
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-pio pkg install -g --platform "platformio/freescalekinetis@^9.2.0"
-
-#+END_SRC
-
-*** platformio-blink
-
-**** Build example and upload
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-cd ~/tmp/zephyr_setup/samples/freescalekinetis/platformio-blink
-pio run -e frdm_k64f --target upload
-
-#+END_SRC
-
-*** platformio-net-telnet
-
-**** Build example and upload
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-cd ~/tmp/zephyr_setup/samples/freescalekinetis/platformio-net-telnet
-pio run -e frdm_k64f --target upload
-
-#+END_SRC
-
-**** Test example
-
-***** Scan for telnet ports
-
-#+BEGIN_SRC sh
-
-ip addr
-# note ip address, e.g. 10.101.30.57
-guix shell nmap
-nmap -p 23 10.101.30.0/24 --open
-
-#+END_SRC
-
-***** Open telnet port
-
-#+BEGIN_SRC sh
-
-guix shell inetutils
-telnet 10.101.30.xx
-
-#+END_SRC
-
-*** zephyr-microros-int32-publisher
-
-**** Build example and upload
-
-#+BEGIN_SRC sh
-
-guix shell platformio
-cd ~/tmp/zephyr_setup/samples/freescalekinetis/platformio-net-telnet
-pio run -e frdm_k64f --target upload
-
-#+END_SRC
-
-**** Test example
-
-***** Scan for telnet ports
-
-#+BEGIN_SRC sh
-
-ip addr
-# note ip address, e.g. 10.101.30.57
-guix shell nmap
-nmap -p 23 10.101.30.0/24 --open
-
-#+END_SRC
-
-***** Open telnet port
-
-#+BEGIN_SRC sh
-
-guix shell inetutils
-telnet 10.101.30.xx
-
-#+END_SRC
-
-* Docker and West
-
-** Docker on host machine
-
-*** Debian-based
-
-#+BEGIN_SRC sh
-
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
 sudo apt-get install \
@@ -286,64 +40,298 @@ sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 sudo groupadd docker
 sudo usermod -aG docker $USER
-
 #+END_SRC
 
-** Pull Docker Image
+*** Pull Docker Image
 
 #+BEGIN_SRC sh
-
 docker pull zephyrprojectrtos/zephyr-build:latest
-
 #+END_SRC
 
-** Install west
+*** Run Docker Image
 
-*** venv
+#+BEGIN_SRC sh
+mkdir -p ~/zephyrproject
+docker run -it --rm --privileged -p 5900:5900 -v ~/zephyrproject:/workdir -v /dev:/dev zephyrprojectrtos/zephyr-build:latest
+#+END_SRC
+
+**** Get Zephyr source code
+
+#+BEGIN_SRC sh
+west init
+west update
+west zephyr-export
+#+END_SRC
+
+**** Build the Blinky Sample
+
+#+BEGIN_SRC sh
+cd zephyr
+west build -p always -b teensy40 samples/basic/blinky
+exit
+#+END_SRC
+
+**** Flash the Blinky Sample
+
+#+BEGIN_SRC sh
+guix shell teensy-loader-cli
+teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephyr.hex
+#+END_SRC
+
+** Guix
+
+*** Install west
+
+**** guix
 
 #+BEGIN_SRC sh
 
-python3 -m venv ~/zephyrproject/.venv
-source ~/zephyrproject/.venv/bin/activate
-pip install west
+guix time-machine -C .channels.scm -- shell --pure -m .manifest.scm
+export ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb
+export GNUARMEMB_TOOLCHAIN_PATH=$(guix build arm-none-eabi-toolchain)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pyocd
 
 #+END_SRC
 
-** Get Zephyr
+*** Get Zephyr
 
 #+BEGIN_SRC sh
 
-west init -m https://github.com/zephyrproject-rtos/zephyr --mr v2.7.2 ~/zephyrproject
+west init -m https://github.com/janelia-embedded/zephyr_setup ~/zephyrproject
 cd ~/zephyrproject
 west update
 west zephyr-export
 
 #+END_SRC
 
-** Run Docker Image
+*** frdm_k64f
+
+**** blinky
+
+***** build
 
 #+BEGIN_SRC sh
 
-docker run -it --rm --privileged -p 5900:5900 -v ~/zephyrproject:/workdir -v /dev:/dev zephyrprojectrtos/zephyr-build:latest
+west build -p auto -b frdm_k64f zephyr_setup/samples/basic/blinky
 
 #+END_SRC
 
-** Build the Blinky Sample
+***** flash
 
 #+BEGIN_SRC sh
 
-cd zephyr
-sudo west build -p auto -b teensy40 samples/basic/blinky
-exit
+west flash
 
 #+END_SRC
 
-** Flash the Blinky Sample
+*** teensy
+
+**** blinky
+
+***** build
 
 #+BEGIN_SRC sh
 
-guix shell teensy-loader-cli
-teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/zephyr/build/zephyr/zephyr.hex
+west build -p auto -b teensy40 zephyr_setup/samples/basic/blinky
 
 #+END_SRC
+
+***** flash
+
+#+BEGIN_SRC sh
+
+teensy_loader_cli -v --mcu=TEENSY40 -w ~/zephyrproject/build/zephyr/zephyr.hex
+
+#+END_SRC
+
+*** nucleo_h743zi
+
+**** blinky
+
+***** build
+
+#+BEGIN_SRC sh
+
+west build -p auto -b nucleo_h743zi zephyr_setup/samples/basic/blinky
+
+#+END_SRC
+
+***** flash
+
+#+BEGIN_SRC sh
+
+west flash
+
+#+END_SRC
+
+** PlatformIO
+
+*** Setup platformio-udev.rules
+
+#+BEGIN_SRC sh
+
+curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/master/scripts/99-platformio-udev.rules | sudo tee /etc/udev/rules.d/99-platformio-udev.rules
+sudo service udev restart
+sudo usermod -a -G dialout $USER
+sudo usermod -a -G plugdev $USER
+sudo reboot
+
+#+END_SRC
+
+*** Download samples
+
+#+BEGIN_SRC sh
+
+mkdir -p ~/tmp && cd "$_"
+git clone https://github.com/janelia-embedded/zephyr_setup
+
+#+END_SRC
+
+*** Teensy 4.0
+
+**** Install platform-teensy
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio pkg install -g --platform "platformio/teensy@^4.16.0"
+
+#+END_SRC
+
+**** platformio-blink
+
+***** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/samples/teensy/platformio-blink
+pio run -e teensy40 --target upload
+
+#+END_SRC
+
+**** platformio-synchronization
+
+***** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/samples/teensy/platformio-synchronization
+pio run -e teensy40 --target upload
+
+#+END_SRC
+
+***** Test example
+
+****** Connect TTL to USB serial converter
+
+| Cable  | Teensy40 | Description |
+|--------+----------+-------------|
+| black  |      GND | GND         |
+| orange |        0 | TXD         |
+| yellow |        1 | RXD         |
+
+****** Run device monitor
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio device monitor -p /dev/ttyUSB0 -b 115200
+
+#+END_SRC
+
+*** NXP FRDM-K64F
+
+**** Install platform-freescalekinetis
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+pio pkg install -g --platform "platformio/freescalekinetis@^9.2.0"
+
+#+END_SRC
+
+**** platformio-blink
+
+***** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/samples/freescalekinetis/platformio-blink
+pio run -e frdm_k64f --target upload
+
+#+END_SRC
+
+**** platformio-net-telnet
+
+***** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/samples/freescalekinetis/platformio-net-telnet
+pio run -e frdm_k64f --target upload
+
+#+END_SRC
+
+***** Test example
+
+****** Scan for telnet ports
+
+#+BEGIN_SRC sh
+
+ip addr
+# note ip address, e.g. 10.101.30.57
+guix shell nmap
+nmap -p 23 10.101.30.0/24 --open
+
+#+END_SRC
+
+****** Open telnet port
+
+#+BEGIN_SRC sh
+
+guix shell inetutils
+telnet 10.101.30.xx
+
+#+END_SRC
+
+**** zephyr-microros-int32-publisher
+
+***** Build example and upload
+
+#+BEGIN_SRC sh
+
+guix shell platformio
+cd ~/tmp/zephyr_setup/samples/freescalekinetis/platformio-net-telnet
+pio run -e frdm_k64f --target upload
+
+#+END_SRC
+
+***** Test example
+
+****** Scan for telnet ports
+
+#+BEGIN_SRC sh
+
+ip addr
+# note ip address, e.g. 10.101.30.57
+guix shell nmap
+nmap -p 23 10.101.30.0/24 --open
+
+#+END_SRC
+
+****** Open telnet port
+
+#+BEGIN_SRC sh
+
+guix shell inetutils
+telnet 10.101.30.xx
+
+#+END_SRC
+
 
